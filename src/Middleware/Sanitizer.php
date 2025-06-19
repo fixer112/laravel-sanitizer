@@ -1,15 +1,24 @@
 <?php
 
-namespace Fixer112\Sanitizer;
+namespace Fixer112\Sanitizer\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
-class SanitizeInput
+class Sanitizer
 {
+    protected $response;
+
+    public function __construct(ResponseFactory $response)
+    {
+        $this->response = $response;
+    }
+
     public function handle(Request $request, Closure $next)
     {
+
         $userAgent = strtolower($request->header('User-Agent'));
 
         $patterns = [
@@ -31,6 +40,7 @@ class SanitizeInput
         foreach ($input as $key => $value) {
             if (in_array($key, ['password', 'confirm_password'])) {
                 $sanitized[$key] = $value;
+
                 continue;
             }
 
@@ -51,7 +61,7 @@ class SanitizeInput
         $request->merge($sanitized);
 
         if (
-            !$userAgent ||
+            ! $userAgent ||
             str_contains($userAgent, 'bot') ||
             str_contains($userAgent, 'crawler') ||
             str_contains($userAgent, 'spider') ||
@@ -59,7 +69,7 @@ class SanitizeInput
             str_contains($userAgent, 'httpclient') ||
             str_contains($userAgent, 'scrapy')
         ) {
-            return response()->json(['message' => 'Bot activity detected'], 422);
+            return $this->response()->json(['message' => 'Bot activity detected'], 422);
         }
 
         return $next($request);

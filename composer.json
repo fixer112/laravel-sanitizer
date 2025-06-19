@@ -1,0 +1,24 @@
+{
+  "name": "fixer112/laravel-sanitizer",
+  "description": "Laravel middleware to sanitize inputs and block malicious bots and codes",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Fixer112\\Sanitizer\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.0",
+    "illuminate/support": "^9.0|^10.0|^11.0|^12.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Fixer112\\Sanitizer\\SanitizerServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

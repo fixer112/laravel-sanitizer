@@ -1,8 +1,8 @@
 # Laravel Input Sanitizer Middleware
 
 ![Laravel](https://img.shields.io/badge/Laravel-10.x%20%7C%2011.x%20%7C%2012.x-orange)
-![License](https://img.shields.io/github/license/fixer112/sanitizer)
-![Packagist](https://img.shields.io/packagist/v/fixer112/sanitizer)
+![License](https://img.shields.io/github/license/fixer112/laravel-sanitizer)
+![Packagist](https://img.shields.io/packagist/v/fixer112/laravel-sanitizer)
 
 A Laravel middleware package that sanitizes all incoming request data by stripping out potentially malicious scripts, SQL keywords, and dangerous shell command inputs. It also blocks known bots and crawlers based on the `User-Agent`.
 

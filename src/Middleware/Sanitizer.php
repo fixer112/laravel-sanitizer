@@ -28,7 +28,6 @@ class Sanitizer
             '/javascript:/i',
             '/data\s*:\s*text\/html\s*;?\s*base64,/i',
             '/&#x[0-9a-f]+;/i',
-            '/[\s;&|<>`\\\\()]/',
             '/(^|\s)(cmd|powershell|shutdown|del|format|calc|reg|wmic)(\s|$)/i',
             '/\b(select|insert|update|delete|drop|create|alter|truncate|exec|declare)\b/i',
             '/\b(eval|exec|system|passthru|shell_exec|popen|proc_open)\b/i',

@@ -3,18 +3,16 @@
 namespace Fixer112\Sanitizer\Middleware;
 
 use Closure;
-use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Sanitizer
 {
     protected $response;
 
-    public function __construct(ResponseFactory $response)
-    {
-        $this->response = $response;
-    }
+    public function __construct()
+    {}
 
     public function handle(Request $request, Closure $next)
     {
@@ -68,7 +66,7 @@ class Sanitizer
             str_contains($userAgent, 'httpclient') ||
             str_contains($userAgent, 'scrapy')
         ) {
-            return $this->response()->json(['message' => 'Bot activity detected'], 422);
+            throw new HttpException(422,'Bot activity detected');
         }
 
         return $next($request);

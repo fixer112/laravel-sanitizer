@@ -48,7 +48,7 @@ class Sanitizer
             }
         }
 
-        return null;
+        return $next($request);
 
     }
 

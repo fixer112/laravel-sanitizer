@@ -4,71 +4,61 @@ namespace Fixer112\Sanitizer\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Sanitizer
 {
-    protected $response;
-
-    public function __construct()
-    {}
-
     public function handle(Request $request, Closure $next)
     {
+        $userAgent = strtolower($request->header('User-Agent', ''));
+        $clientIp = $request->ip();
 
-        $userAgent = strtolower($request->header('User-Agent'));
-
-        $patterns = [
-            '/<\s*script\b[^>]*>(.*?)<\s*\/\s*script>/is',
-            '/<\s*(iframe|embed|object|svg|link|meta|style)\b[^>]*>/i',
-            '/on\w+\s*=\s*["\']?[^"\']*["\']?/i',
-            '/javascript:/i',
-            '/data\s*:\s*text\/html\s*;?\s*base64,/i',
-            '/&#x[0-9a-f]+;/i',
-            '/(^|\s)(cmd|powershell|shutdown|del|format|calc|reg|wmic)(\s|$)/i',
-            '/\b(select|insert|update|delete|drop|create|alter|truncate|exec|declare)\b/i',
-            '/\b(eval|exec|system|passthru|shell_exec|popen|proc_open)\b/i',
-        ];
-
-        $input = $request->all();
-        $sanitized = [];
-
-        foreach ($input as $key => $value) {
-            if (in_array($key, ['password', 'confirm_password'])) {
-                $sanitized[$key] = $value;
-
-                continue;
-            }
-
-            $flatValues = is_array($value) ? Arr::flatten($value) : [$value];
-            $cleanedValues = [];
-
-            foreach ($flatValues as $item) {
-                $cleanedItem = $item;
-                foreach ($patterns as $pattern) {
-                    $cleanedItem = preg_replace($pattern, '', $cleanedItem);
-                }
-                $cleanedValues[] = $cleanedItem;
-            }
-
-            $sanitized[$key] = is_array($value) ? $cleanedValues : $cleanedValues[0];
+        if (app()->runningInConsole() || app()->runningUnitTests()) {
+            return $next($request);
         }
 
-        $request->merge($sanitized);
-
-        if (
-            ! $userAgent ||
-            str_contains($userAgent, 'bot') ||
-            str_contains($userAgent, 'crawler') ||
-            str_contains($userAgent, 'spider') ||
-            str_contains($userAgent, 'curl') ||
-            str_contains($userAgent, 'httpclient') ||
-            str_contains($userAgent, 'scrapy')
-        ) {
-            throw new HttpException(422,'Bot activity detected');
+        if ($userAgent === '' && $this->isInternalRequestPath($request->path())) {
+            return $next($request);
         }
 
-        return $next($request);
+        // Load from config
+        $allowedAgents = config('sanitizer.allowed_agents', []);
+        $blockedAgents = config('sanitizer.blocked_agents', []);
+        $allowLocalhost = config('sanitizer.allow_localhost', true);
+
+        foreach ($allowedAgents as $agent) {
+            if (str_contains($userAgent, $agent)) {
+                return $next($request);
+            }
+        }
+
+        if ($allowLocalhost && in_array($clientIp, ['127.0.0.1', '::1'])) {
+            return $next($request);
+        }
+
+        foreach ($blockedAgents as $bot) {
+            if (str_contains($userAgent, $bot)) {
+                throw new HttpException(422, 'Bot activity detected');
+            }
+        }
+
+        return null;
+
+    }
+
+    protected function isInternalRequestPath(string $path): bool
+    {
+        $patterns = config('sanitizer.internal_paths', []);
+
+        foreach ($patterns as $pattern) {
+            // Convert 'vendor/*' to regex ^vendor/.*$
+            $regex = '/^'.str_replace(['*', '/'], ['.*', '\/'], $pattern).'$/i';
+            if (preg_match($regex, $path)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

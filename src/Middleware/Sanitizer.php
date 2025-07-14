@@ -4,8 +4,6 @@ namespace Fixer112\Sanitizer\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Sanitizer
 {
@@ -39,7 +37,7 @@ class Sanitizer
 
         foreach ($blockedAgents as $bot) {
             if (str_contains($userAgent, $bot)) {
-                throw new HttpException(422, 'Bot activity detected');
+                abort(422, 'Bot activity detected');
             }
         }
 

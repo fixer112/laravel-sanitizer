@@ -4,6 +4,7 @@ namespace Fixer112\Sanitizer\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class Sanitizer
 {
@@ -37,6 +38,12 @@ class Sanitizer
 
         foreach ($blockedAgents as $bot) {
             if (str_contains($userAgent, $bot)) {
+                if (app()->environment() == 'local') {
+                    Log::error('Sanitizer detected bot', [
+                        'header' => request()->headers->all(),
+                        'requests' => request()->all(),
+                    ]);
+                }
                 abort(422, 'Bot activity detected');
             }
         }

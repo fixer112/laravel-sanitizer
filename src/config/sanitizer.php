@@ -13,6 +13,15 @@ return [
         'phpunit',
         'insomnia',
         'postmanruntime',
+        'Googlebot',
+        'bingbot',
+        'slackbot',
+        'facebookexternalhit',
+        'twitterbot',
+        'WhatsApp',
+        'Discordbot',
+        'TelegramBot',
+
     ],
 
     // Substrings to detect as bots

@@ -28,7 +28,7 @@ class Sanitizer
         $allowLocalhost = config('sanitizer.allow_localhost', true);
 
         foreach ($allowedAgents as $agent) {
-            if (str_contains($userAgent, $agent)) {
+            if (str_contains($userAgent, strtolower($agent))) {
                 return $next($request);
             }
         }
@@ -38,7 +38,7 @@ class Sanitizer
         }
 
         foreach ($blockedAgents as $bot) {
-            if (str_contains($userAgent, $bot)) {
+            if (str_contains($userAgent, strtolower($bot))) {
                 if (app()->environment() == 'local') {
                     Log::error('Sanitizer detected bot', [
                         'header' => request()->headers->all(),

@@ -11,7 +11,7 @@ class Sanitizer
     public function handle(Request $request, Closure $next)
     {
 
-        $userAgent = strtolower($request->header('User-Agent', ''));
+        $userAgent = strtolower($request->header('user-agent', ''));
         $clientIp = $request->ip();
 
         if (app()->runningInConsole() || app()->runningUnitTests()) {

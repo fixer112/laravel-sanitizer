@@ -43,6 +43,7 @@ class Sanitizer
                     Log::error('Sanitizer detected bot', [
                         'header' => request()->headers->all(),
                         'requests' => request()->all(),
+                        'route' => url()->current(),
                     ]);
                 }
                 abort(422, 'Bot activity detected');
